@@ -1,4 +1,4 @@
-const t = require('../scripts/trailCrusher.js');
+const t = require('../../scripts/trailCrusher.js');
 
 module.exports.Run = function(){
   t.Enter_Text('Username', 'kevimplement');

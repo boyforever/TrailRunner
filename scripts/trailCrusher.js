@@ -4,8 +4,8 @@ var until = webdriver.until;
 var By = webdriver.By;
 var driver;
 
-module.exports.Run = function(title){ require('../' + title + '.js').Run();};
-module.exports.Run = function(title, action){ require('../' + title + '.js').Run(action);};
+module.exports.Run = function(title){ require('./' + title + '.js').Run();};
+module.exports.Run = function(title, action){ require('./' + title + '.js').Run(action);};
 module.exports.Open = function(){ driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).build();};
 module.exports.Open = function(pageUrl){ driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).build(); driver.get(pageUrl);};
 module.exports.OpenIE = function(){ driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.ie()).build();  driver.ignoreZoomSetting = true;};
