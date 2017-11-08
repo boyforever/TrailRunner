@@ -1,0 +1,18 @@
+stored in session:
+UserID
+BoardID
+SchoolID
+CashDrawerID
+BankAccountID
+AccessToScf
+SCOBoardID
+PendingItemCount
+
+
+
+stored in request:
+Bank
+User
+Board
+School
+BankAccount
