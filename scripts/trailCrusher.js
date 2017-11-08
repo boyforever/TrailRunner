@@ -125,8 +125,8 @@ module.exports.Enter_Date_Reminder = function(title1, title2, value ){
 module.exports.Enter_Text = function (title, value){
   var xpaths = [
     "//input[@name='" + title + "']",
-    "//div[contains(text(),'" + title + "')]]//input[@type='text']",
-    "//div[contains(text(),'" + title + "')]]//textarea",
+    "//div[div[contains(text(),'" + title + "')]]//input[@type='text']",
+    "//div[div[contains(text(),'" + title + "')]]//textarea",
     "//td[contains(text(),'" + title + "')]/following-sibling::td[1]//input[@type='text']",
     "//td[p[contains(text(),'" + title + "')]]/following-sibling::td[1]//input[@type='text']"
   ];

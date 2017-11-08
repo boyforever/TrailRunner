@@ -1,4 +1,4 @@
-const t = require('../scripts/trailCrusher.js');
+const t = require('../../scripts/trailCrusher.js');
 
 module.exports.Run = function(){
   t.Click_Button('New Item');
@@ -7,4 +7,5 @@ module.exports.Run = function(){
   t.Click_Alert('OK');
   t.Wait();
   t.Select_List('School Year:', '2016/2017');
+  t.Enter_Text('Name:', 'testing');
 }

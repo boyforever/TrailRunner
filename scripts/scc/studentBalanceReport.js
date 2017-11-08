@@ -1,13 +1,13 @@
 
-const t = require('../scripts/trailCrusher.js');
+const t = require('../../scripts/trailCrusher.js');
 
 module.exports.Run = function(){
   t.Click_Button('REPORTS');
-  t.Click_Button('Item Attachment Report');
+  t.Click_Button('Student Balance Report');
   // t.Select_List('School:', 'Banting');
   // t.Wait(3000);
   // t.Select_List('Year:', '2016/2017');
-  t.Select_List('Show:', 'Fully Paid');
+  // t.Select_List('Show:', 'Fully Paid');
   // t.Select_List('Homeroom:', )
   // t.Click_ToUncheck('Registration', 'Registered');
   // t.Click_ToCheck('School Type', 'Elementary');

@@ -1,9 +1,9 @@
 
-const t = require('../scripts/trailCrusher.js');
+const t = require('../../scripts/trailCrusher.js');
 
 module.exports.Run = function(){
   t.Click_Button('REPORTS');
-  t.Click_Button('Permission Form Report');
+  t.Click_Button('Payment Schedule Report');
   // t.Select_List('School:', 'Banting');
   // t.Wait(3000);
   // t.Select_List('Year:', '2016/2017');
