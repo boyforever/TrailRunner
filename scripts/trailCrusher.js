@@ -2,7 +2,36 @@ var fs = require('fs');
 var webdriver = require('selenium-webdriver');
 var until = webdriver.until;
 var By = webdriver.By;
+var Key = webdriver.Key;
 var driver;
+
+var GridTypeEnum = {
+  CATEGORY: 1,
+  SUPPLIER: 2,
+  CATEGORYUMBRELLA: 3,
+  GLDEPARTMENT: 4,
+  GLNAME: 5,
+  GLNAMEUMBRELLA: 6,
+  MEMO: 7,
+  CASHBOX: 8,
+  LEDGER: 9,
+  properties: {
+    1: {grid: "gridCategories"},
+    2: {grid: "gridSuppliers"},
+    3: {grid: "gridCategoryUmbrellas"},
+    4: {grid: "gridGLDepartments"},
+    5: {grid: "gridGLNames"},
+    6: {grid: "tabGLNameUmbrella_Datagrid1"},
+    7: {grid: "gridMemo"},
+    8: {grid: "gridCashbox"},
+    9: {grid: "gridLedger"},
+  }
+};
+var ColumnTypeEnum = {
+  TEXTBOX: 1,
+  DROPDOWNBOX: 2,
+  CHECKBOX: 3,
+};
 
 module.exports.Run = function(title){ require('./' + title + '.js').Run();};
 module.exports.Run = function(title, action){ require('./' + title + '.js').Run(action);};
@@ -17,62 +46,24 @@ module.exports.Log = function(fn, msg){ fs.appendFile('./logs/' + fn, msg, 'utf8
 module.exports.TakeScreenshot = function(fn){ driver.takeScreenshot().then(function(image, err) { fs.writeFile('./screenshots/' + fn + '.png', image, 'base64', function(err) { }); } );};
 module.exports.Wait = function(interval){ if(!interval || interval <= 0) interval = 2000;  driver.sleep(interval);};
 
-
-//for deposits->calculatingdeposit
-module.exports.Add_Category = function (name, amount, reason, dept, object, memo){
-  ////div[@class="divDataGrid"]//table/tbody/tr/td/div[@id="tabDepositPage_tabDeposit_gridCategories_column0_control"]/select/option[contains(text(), 'Art')]
-  var xpaths = [
-    "//div[@class=\"divDataGrid\"]//table/tbody/tr/td/div[@id=\"tabDepositPage_tabDeposit_gridCategories_column0_control\"]/select/option[text()= \"Art\"]",
-    // "//div[@class=\"divDataGrid\"]//table/tbody/tr/td/div[@id=\"tabDepositPage_tabDeposit_gridCategories_column1_control\"]/input[@type=\"text\"]",
-    "//div[@class=\"divDataGrid\"]//table/tbody/tr/td/div[@id=\"tabDepositPage_tabDeposit_gridCategories_column2_control\"]/input[@type=\"text\"]",
-    "//div[@class=\"divDataGrid\"]//table/tbody/tr/td/div[@id=\"tabDepositPage_tabDeposit_gridCategories_column3_control\"]/input[@type=\"text\"]"
-    // "//div[@class=\"divDataGrid\"]//table/tbody/tr/td/div[@id=\"tabDepositPage_tabDeposit_gridCategories_column4_control\"]/select/option[contains(text(), \"" + dept + "\")]",
-    // "//div[@class=\"divDataGrid\"]//table/tbody/tr/td/div[@id=\"tabDepositPage_tabDeposit_gridCategories_column5_control\"]/select/option[contains(text(), \"" + object + "\")]",
-    // "//div[@class=\"divDataGrid\"]//table/tbody/tr/td/div[@id=\"tabDepositPage_tabDeposit_gridCategories_column6_control\"]/select/option[contains(text(), \"" + memo + "\")]"
-  ];
-  // var values = ['','',''];
-  // values[1] = amount;
-  // values[2] = reason;
-  // for(var i = 0; i < 2; i++){
-  //   perform(xpaths[i], values[i]);
-  // }
-  driver.findElement(By.xpath(xpaths[0])).then(function(elem){ driver.actions().click(elem).perform();});
-  driver.findElement(By.xpath(xpaths[1])).then(function(elem){ elem.clear(); elem.sendKeys(amount);});
-  driver.findElement(By.xpath(xpaths[2])).then(function(elem){ elem.clear(); elem.sendKeys(reason);});
-  // // Click_Element()
-  // var id = "tabDepositPage_tabDeposit_gridCategories_column6_control";
-  // driver.findElement(By.xpath("//div[@class=\"divDataGrid\"]//table/tbody/tr/td/div[@id=\"" + id + "\"]")).then(function(input){
-  //   //input.
-  // });
-
-
-  // for(var i = 1; i <= 8; i++){
-  //   driver.findElement(By.xpath("//div[@class=\"divDataGrid\"]//table/thead/tr/th[" + i + "]")).then(function(th){
-  //     // var text = '';
-  //     th.getText().then(function(t){
-  //       console.log(t);
-  //     })
-  //     // console.log(th);
-  //     // console.log(th.getText());
-  //     // if(th.getText())
-  //     // console.log("found ths");
-  //     // var columns = [];
-  //     // for(var i =0; i < ths.length; i++){
-  //     //   columns.push(ths[i].getText());
-  //     //   console.log(ths[i].getText());
-  //     // }
-  //
-  //     //get columns headers
-  //     ////div[@class="divDataGrid"]//table/thead/tr/descendant-or-self::*/text()
-  //
-  //     // console.log(columns);
-  //   }, function(){
-  //     console.log("no text");
-  //   });
-  // }
-
-};
-
+module.exports.Add_RowToGrid = function (gridType, columnType, columnIndex, value){
+  var xpath = "";
+  xpath = "//div[contains(@id, \"_" + GridTypeEnum.properties[gridType].grid + "_column" + (columnIndex - 1) + "_control\")]";
+  if(columnType === ColumnTypeEnum.DROPDOWNBOX){
+    xpath = xpath + "/select/option[text()= \"" + value + "\"]";
+    driver.findElement(By.xpath(xpath)).then(function(elem){ elem.click();});
+  } else if(columnType === ColumnTypeEnum.TEXTBOX) {
+    xpath = xpath + "/input[@type=\"text\"]";
+    driver.findElement(By.xpath(xpath)).then(function(elem){ elem.clear(); elem.sendKeys(value);});
+  }else if(columnType === ColumnTypeEnum.CHECKBOX) {
+    xpath = xpath + "/input[@type=\"checkbox\"]";
+    driver.findElement(By.xpath(xpath)).then(function(elem){ elem.click(); });
+  }
+}
+module.exports.ChangeBankAccount = function(bankAccountName){
+  t.Select_List('', bankAccountName);
+  t.Wait();
+}
 module.exports.Click_Alert = function(value){
   switch (value) {
     case 'OK':
@@ -82,13 +73,20 @@ module.exports.Click_Alert = function(value){
       driver.switchTo().alert().dismiss();
   }
 };
-module.exports.Click_Button = function (title){
-  if(typeof title === 'string'){
-    Click_Button(title);
+module.exports.Click_Button = function (title1, title2){
+  if(title2){
+    var xpaths = [
+      "//div[span[contains(text(), '" + title1 + "')]]//td[contains(text(), '" + title2 + "')]"
+    ];
+    Click_Element(xpaths, 0);
   } else {
-    for (var i = 0; i < title.length; i++){
-      Click_Button(title[i]);
-      driver.sleep(1000);
+    if(typeof title1 === 'string'){
+      Click_Button(title1);
+    } else {
+      for (var i = 0; i < title1.length; i++){
+        Click_Button(title1[i]);
+        driver.sleep(1000);
+      }
     }
   }
 };
@@ -109,8 +107,14 @@ module.exports.Click_ButtonInRgTable = function(title, value){
 module.exports.Click_ToUncheck = function(title, value){
   Click_CheckBox(title, value, false);
 };
+module.exports.Click_ToUncheck = function(title){
+  Click_CheckBox(title, "", false);
+};
 module.exports.Click_ToCheck = function(title, value){
   Click_CheckBox(title, value, true);
+};
+module.exports.Click_ToCheck = function(title){
+  Click_CheckBox(title, "", true);
 };
 module.exports.Enter_Date = function(title1, title2, value ){
   var xpaths = [
@@ -122,15 +126,31 @@ module.exports.Enter_Date = function(title1, title2, value ){
 module.exports.Enter_Date_Reminder = function(title1, title2, value ){
   driver.findElement(By.xpath("//div[@class='formRow'][div[@class='formItemLabel'][contains(text(),'" + title1 + "')]][//div[contains(text(), '" + title2 + "')]]//td[@class='rcInputCell']//input[@type='text']")).then(function(elem){ elem.clear(); elem.sendKeys(value);});
 };
-module.exports.Enter_Text = function (title, value){
+module.exports.Enter_Text = function (title1, title2, value){
   var xpaths = [
-    "//input[@name='" + title + "']",
-    "//div[div[contains(text(),'" + title + "')]]//input[@type='text']",
-    "//div[div[contains(text(),'" + title + "')]]//textarea",
-    "//td[contains(text(),'" + title + "')]/following-sibling::td[1]//input[@type='text']",
-    "//td[p[contains(text(),'" + title + "')]]/following-sibling::td[1]//input[@type='text']"
+    "//table[thead//td/p[contains(text(), '" + title1 + "')]]/tbody//td[p[contains(text(), '" + title2 + "')]]/following-sibling::td[1]//input[@type='text']"
   ];
   Enter_Text(xpaths, 0, value);
+};
+module.exports.Enter_Text = function (title, value){
+  if(typeof value === 'string'){
+    var xpaths = [
+      "//input[@name='" + title + "']",
+      "//div[div[contains(text(),'" + title + "')]]//input[@type='text']",
+      "//div[div[contains(text(),'" + title + "')]]//textarea",
+      "//td[contains(text(),'" + title + "')]/following-sibling::td[1]//input[@type='text']",
+      "//td[p[contains(text(),'" + title + "')]]/following-sibling::td[1]//input[@type='text']",
+      "//input[contains(@placeholder, '" + title + "')]"
+    ];
+    Enter_Text(xpaths, 0, value);
+  } else {
+    var xpath = "(//table/thead[tr/td/p[contains(text(), '" + title + "')]]//td/input[@type='text'])[";
+    for (var i = 1; i <= value.length; i++){
+      driver.findElement(By.xpath(xpath + i + ']')).sendKeys(value[i-1]);
+      driver.sleep(1000);
+    }
+    driver.findElement(By.xpath(xpath + value.length + ']')).sendKeys(Key.ENTER);
+  }
 };
 module.exports.Move_Slider = function(title, minValue, maxValue){
   driver.findElement(By.id("RadSliderEndDrag_RdSliderMinMax")).then(function(elem){ driver.actions().dragAndDrop(elem,{x: (maxValue - 1) * 5, y: 0}).perform(); })
@@ -227,9 +247,11 @@ function Click_CheckBox(title, value, isToCheck){
   var xpaths = [
     "//*[div[contains(text(), '" + title + "')]][//label[contains(text(),'" + value + "')]]//" + cond,
     "//div[div[contains(text(),'" + title + "')]]//div[contains(text(),'" + value + "')]//" + cond,
-    "//p[label[contains(text(),'" + value + "')]]//"+ cond,
+    "//p[label[contains(text(),'" + title + "')]]//"+ cond,
     "//div[contains(text(),'" + title + "')]/" + cond,
-    "//td[label[contains(text(), '" + value + "')]]/" + cond
+    "//td[label[contains(text(), '" + title + "')]]/" + cond,
+    "//tr[td[contains(text(), '" + title + "')]]/td/" + cond,
+    "//tr[td/p[contains(text(), '" + title + "')]]/td/" + cond
   ];
   Click_Element(xpaths, 0);
 };
@@ -240,7 +262,8 @@ function Click_Button(title){
     "//input[contains(@class, \"button\") or @type=\"button\" or @buttontype=\"button\" or @type=\"submit\"][contains(@value, \"" + title + "\")]",
     "//a[text()[normalize-space(.) = \"" + title + "\"]]",
     "//img[contains(@title, \"" + title + "\") or contains(@alt, \"" + title + "\")]",
-    "//input[@type=\"image\"][contains(@alt, \"" + title + "\")]"
+    "//input[@type=\"image\"][contains(@alt, \"" + title + "\")]",
+    "//tr[td[contains(text(), \"" + title + "\")]]"
   ];
   Click_Element(xpaths, 0);
 };
