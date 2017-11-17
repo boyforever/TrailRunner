@@ -5,7 +5,7 @@ var By = webdriver.By;
 var Key = webdriver.Key;
 var driver;
 
-var GridTypeEnum = {
+const GridTypeEnum = {
   CATEGORY: 1,
   SUPPLIER: 2,
   CATEGORYUMBRELLA: 3,
@@ -15,6 +15,7 @@ var GridTypeEnum = {
   MEMO: 7,
   CASHBOX: 8,
   LEDGER: 9,
+  PURCHASEORDER: 10,
   properties: {
     1: {grid: "gridCategories"},
     2: {grid: "gridSuppliers"},
@@ -25,14 +26,15 @@ var GridTypeEnum = {
     7: {grid: "gridMemo"},
     8: {grid: "gridCashbox"},
     9: {grid: "gridLedger"},
+    10: {grid: "tableItems"},
   }
 };
-var ColumnTypeEnum = {
+const InputTypeEnum = {
   TEXTBOX: 1,
   DROPDOWNBOX: 2,
   CHECKBOX: 3,
 };
-
+module.exports = { GridTypeEnum, InputTypeEnum };
 module.exports.Run = function(title){ require('./' + title + '.js').Run();};
 module.exports.Run = function(title, action){ require('./' + title + '.js').Run(action);};
 module.exports.Open = function(){ driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).build();};
@@ -46,23 +48,123 @@ module.exports.Log = function(fn, msg){ fs.appendFile('./logs/' + fn, msg, 'utf8
 module.exports.TakeScreenshot = function(fn){ driver.takeScreenshot().then(function(image, err) { fs.writeFile('./screenshots/' + fn + '.png', image, 'base64', function(err) { }); } );};
 module.exports.Wait = function(interval){ if(!interval || interval <= 0) interval = 2000;  driver.sleep(interval);};
 
+function xpathsButtons(title1, title2){
+  if(title2){
+    return [
+      "//div[span[contains(text(), '" + title1 + "')]]//td[contains(text(), '" + title2 + "')]"
+    ];
+  } else {
+    return [
+      "//td[contains(@class, \"buttonMiddle\")][contains(text(), \"" + title1 + "\")]",
+      "//input[@type=\"button\"][contains(@title, \"" + title1 + "\")]",
+      "//input[contains(@class, \"button\") or @type=\"button\" or @buttontype=\"button\" or @type=\"submit\"][contains(@value, \"" + title1 + "\")]",
+      "//a[text()[normalize-space(.) = \"" + title1 + "\"]]",
+      "//img[contains(@title, \"" + title1 + "\") or contains(@alt, \"" + title1 + "\")]",
+      "//input[@type=\"image\"][contains(@alt, \"" + title1 + "\")]",
+      "//input[@type=\"image\"][contains(@src, \"" + title1.toLowerCase() + "\")]",
+      "//tr[td[contains(text(), \"" + title1 + "\")]]",
+      "//img[contains(@src, '" + title1.toLowerCase() + "')]",
+      "//button/span[contains(text(), '" + title1 + "')]",
+      "//a/span/span[contains(text(), '" + title1 + "')]"
+    ];
+  }
+}
+function xpathsCheckBoxes(title, value, isToCheck){
+  var cond = "input[@type='checkbox' and @checked='checked']";
+  if(isToCheck){ cond = "input[@type='checkbox' and not (@checked)]"; }
+  return [
+    "//*[div[contains(text(), '" + title + "')]][//label[contains(text(),'" + value + "')]]//" + cond,
+    "//div[div[contains(text(),'" + title + "')]]//div[contains(text(),'" + value + "')]//" + cond,
+    "//p[label[contains(text(),'" + title + "')]]//"+ cond,
+    "//div[contains(text(),'" + title + "')]/" + cond,
+    "//td[label[contains(text(), '" + title + "')]]/" + cond,
+    "//tr[td[contains(text(), '" + title + "')]]/td/" + cond,
+    "//tr[td/p[contains(text(), '" + title + "')]]/td/" + cond
+  ];
+};
+function xpathsLists(title){
+  return [
+    "//td[contains(text(), '" + title + "')]/following-sibling::td[1]//input[@type='text']",
+    "//div[contains(@style, 'block')]/div[contains(text(), '" + title + "')]/following-sibling::div[1]//input[@type='text']",
+    "//div[contains(text(), '" + title + "')]/following-sibling::*[1]//input[@type='text']",
+    "//div[span[contains(text(), '" + title + "')]]/following-sibling::*[1]//input[@type='text']",
+    "//input[@type='text' and contains(@value, '" + title + "')]"
+  ];
+};
+function xpathsTextBoxes(title){
+  return [
+    "//input[@name='" + title + "']",
+    "//div[div[contains(text(),'" + title + "')]]//input[@type='text']",
+    "//div[div[contains(text(),'" + title + "')]]//textarea",
+    "//td[contains(text(),'" + title + "')]/following-sibling::td[1]//input[@type='text']",
+    "//td[p[contains(text(),'" + title + "')]]/following-sibling::td[1]//input[@type='text']",
+    "//input[contains(@placeholder, '" + title + "')]",
+    "//label[contains(text(), '" + title + "')]/following-sibling::input[1]"
+  ];
+}
+
 module.exports.Add_RowToGrid = function (gridType, columnType, columnIndex, value){
   var xpath = "";
-  xpath = "//div[contains(@id, \"_" + GridTypeEnum.properties[gridType].grid + "_column" + (columnIndex - 1) + "_control\")]";
-  if(columnType === ColumnTypeEnum.DROPDOWNBOX){
-    xpath = xpath + "/select/option[text()= \"" + value + "\"]";
+  if(gridType === GridTypeEnum.PURCHASEORDER){
+    xpath = "//table[@id='" + GridTypeEnum.properties[gridType].grid + "']/tbody/tr[last()]";
     driver.findElement(By.xpath(xpath)).then(function(elem){ elem.click();});
-  } else if(columnType === ColumnTypeEnum.TEXTBOX) {
-    xpath = xpath + "/input[@type=\"text\"]";
-    driver.findElement(By.xpath(xpath)).then(function(elem){ elem.clear(); elem.sendKeys(value);});
-  }else if(columnType === ColumnTypeEnum.CHECKBOX) {
-    xpath = xpath + "/input[@type=\"checkbox\"]";
-    driver.findElement(By.xpath(xpath)).then(function(elem){ elem.click(); });
+    driver.sleep(1000);
+    switch (columnIndex) {
+      case 1:
+        xpath = xpath + "/td[2]/select[1]/option[text()= \"" + value + "\"]";
+        driver.findElement(By.xpath(xpath)).then(function(elem){ elem.click();});
+        break;
+      case 2:
+        xpath = xpath + "/td[2]/select[2]/option[text()= \"" + value + "\"]";
+        driver.findElement(By.xpath(xpath)).then(function(elem){ elem.click();});
+        break;
+      case 3:
+        xpath = xpath + "/td[2]/select[3]/option[text()= \"" + value + "\"]";
+        driver.findElement(By.xpath(xpath)).then(function(elem){ elem.click();});
+        break;
+      case 4:
+        xpath = xpath + "/td[3]/input";
+        driver.findElement(By.xpath(xpath)).then(function(elem){ elem.clear(); elem.sendKeys(value); elem.sendKeys(Key.ENTER);});
+        break;
+      case 5:
+        xpath = xpath + "/td[3]/select/option[text()= \"" + value + "\"]";
+        driver.findElement(By.xpath(xpath)).then(function(elem){ elem.click();});
+        break;
+      case 6:
+        xpath = xpath + "/td[4]/select[1]/option[text()= \"" + value + "\"]";
+        driver.findElement(By.xpath(xpath)).then(function(elem){ elem.click();});
+        break;
+      case 7:
+        xpath = xpath + "/td[4]/select[2]/option[text()= \"" + value + "\"]";
+        driver.findElement(By.xpath(xpath)).then(function(elem){ elem.click();});
+        break;
+      case 8:
+        xpath = xpath + "/td[5]/input";
+        driver.findElement(By.xpath(xpath)).then(function(elem){ elem.clear(); elem.sendKeys(value);});
+        break;
+      case 9:
+        xpath = xpath + "/td[6]/input";
+        driver.findElement(By.xpath(xpath)).then(function(elem){ elem.clear(); elem.sendKeys(value);});
+        break;
+      default:
+    }
+  } else {
+    xpath = "//div[contains(@id, \"_" + GridTypeEnum.properties[gridType].grid + "_column" + (columnIndex - 1) + "_control\")]";
+    if(columnType === InputTypeEnum.DROPDOWNBOX){
+      xpath = xpath + "/select/option[text()= \"" + value + "\"]";
+      driver.findElement(By.xpath(xpath)).then(function(elem){ elem.click();});
+    } else if(columnType === InputTypeEnum.TEXTBOX) {
+      xpath = xpath + "/input[@type=\"text\"]";
+      driver.findElement(By.xpath(xpath)).then(function(elem){ elem.clear(); elem.sendKeys(value);});
+    }else if(columnType === InputTypeEnum.CHECKBOX) {
+      xpath = xpath + "/input[@type=\"checkbox\"]";
+      driver.findElement(By.xpath(xpath)).then(function(elem){ elem.click(); });
+    }
   }
 }
 module.exports.ChangeBankAccount = function(bankAccountName){
-  t.Select_List('', bankAccountName);
-  t.Wait();
+  Select_List('', bankAccountName);
+  driver.sleep(1000);
 }
 module.exports.Click_Alert = function(value){
   switch (value) {
@@ -74,21 +176,14 @@ module.exports.Click_Alert = function(value){
   }
 };
 module.exports.Click_Button = function (title1, title2){
-  if(title2){
-    var xpaths = [
-      "//div[span[contains(text(), '" + title1 + "')]]//td[contains(text(), '" + title2 + "')]"
-    ];
-    Click_Element(xpaths, 0);
-  } else {
     if(typeof title1 === 'string'){
-      Click_Button(title1);
+      Click_Element(xpathsButtons(title1, title2), 0);
     } else {
       for (var i = 0; i < title1.length; i++){
-        Click_Button(title1[i]);
+        Click_Element(xpathsButtons(title1[i], ""), 0);
         driver.sleep(1000);
       }
     }
-  }
 };
 module.exports.Click_FileButton = function(value){ driver.findElement(By.xpath("//input[@type='file']")).sendKeys(value);};
 module.exports.Click_ButtonInRgTable = function(title, value){
@@ -105,16 +200,16 @@ module.exports.Click_ButtonInRgTable = function(title, value){
   }
 }
 module.exports.Click_ToUncheck = function(title, value){
-  Click_CheckBox(title, value, false);
+  Click_Element(xpathsCheckBoxes(title, value, false), 0);
 };
 module.exports.Click_ToUncheck = function(title){
-  Click_CheckBox(title, "", false);
+  Click_Element(xpathsCheckBoxes(title, "", false), 0);
 };
 module.exports.Click_ToCheck = function(title, value){
-  Click_CheckBox(title, value, true);
+  Click_Element(xpathsCheckBoxes(title, value, true), 0);
 };
 module.exports.Click_ToCheck = function(title){
-  Click_CheckBox(title, "", true);
+  Click_Element(xpathsCheckBoxes(title, "", true), 0);
 };
 module.exports.Enter_Date = function(title1, title2, value ){
   var xpaths = [
@@ -134,15 +229,7 @@ module.exports.Enter_Text = function (title1, title2, value){
 };
 module.exports.Enter_Text = function (title, value){
   if(typeof value === 'string'){
-    var xpaths = [
-      "//input[@name='" + title + "']",
-      "//div[div[contains(text(),'" + title + "')]]//input[@type='text']",
-      "//div[div[contains(text(),'" + title + "')]]//textarea",
-      "//td[contains(text(),'" + title + "')]/following-sibling::td[1]//input[@type='text']",
-      "//td[p[contains(text(),'" + title + "')]]/following-sibling::td[1]//input[@type='text']",
-      "//input[contains(@placeholder, '" + title + "')]"
-    ];
-    Enter_Text(xpaths, 0, value);
+    Enter_Text(xpathsTextBoxes(title), 0, value);
   } else {
     var xpath = "(//table/thead[tr/td/p[contains(text(), '" + title + "')]]//td/input[@type='text'])[";
     for (var i = 1; i <= value.length; i++){
@@ -163,14 +250,7 @@ module.exports.Select_ItemInRgTable = function(title, value){
 };
 module.exports.Select_List = function(title, value){
   if(title){
-    var xpaths = [
-      "//td[contains(text(), '" + title + "')]/following-sibling::td[1]//input[@type='text']",
-      "//div[contains(@style, 'block')]/div[contains(text(), '" + title + "')]/following-sibling::div[1]//input[@type='text']",
-      "//div[contains(text(), '" + title + "')]/following-sibling::*[1]//input[@type='text']",
-      "//div[span[contains(text(), '" + title + "')]]/following-sibling::*[1]//input[@type='text']",
-      "//input[@type='text' and contains(@value, '" + title + "')]"
-    ];
-    Select_RdDropDown(xpaths, 0, value);
+    Select_RdDropDown(xpathsLists(title), 0, value);
   } else {
     driver.findElement(By.xpath("//select/option[contains(text(), '" + value + "')]")).then(function(elem){elem.click();})
   }
@@ -222,10 +302,10 @@ function perform(xpath, value){
   }
 }
 function Click_Element (xpaths, index){
-  driver.findElement(By.xpath(xpaths[index])).then(function(elem){ driver.actions().click(elem).perform();},function(){ Click_Element(xpaths, index + 1);});
+  driver.findElement(By.xpath(xpaths[index])).then(function(elem){ driver.actions().click(elem).perform(); },function(){ if(index + 1 == xpaths.length){ console.log("Element (" + xpaths[index] + ") is not found."); } else { Click_Element(xpaths, index + 1); } });
 };
 function Enter_Text (xpaths, index, value){
-  driver.findElement(By.xpath(xpaths[index])).then(function(elem){ elem.clear(); elem.sendKeys(value);},function(){ Enter_Text(xpaths, index + 1, value);});
+  driver.findElement(By.xpath(xpaths[index])).then(function(elem){ elem.clear(); elem.sendKeys(value);},function(){ if(index + 1 == xpaths.length){  console.log("Element (" + xpaths[index] + ") is not found.");  } else {  Enter_Text(xpaths, index + 1, value);  }  });
 }
 function Select_RdDropDown (xpaths, index, value){
   driver.findElement(By.xpath(xpaths[index])).then(function(elem){
@@ -239,31 +319,3 @@ function Select_RdDropDown (xpaths, index, value){
     })
   },function(){ Select_RdDropDown(xpaths, index + 1, value);});
 }
-function Click_CheckBox(title, value, isToCheck){
-  var cond = "input[@type='checkbox' and @checked='checked']";
-  if(isToCheck){
-    cond = "input[@type='checkbox' and not (@checked)]";
-  }
-  var xpaths = [
-    "//*[div[contains(text(), '" + title + "')]][//label[contains(text(),'" + value + "')]]//" + cond,
-    "//div[div[contains(text(),'" + title + "')]]//div[contains(text(),'" + value + "')]//" + cond,
-    "//p[label[contains(text(),'" + title + "')]]//"+ cond,
-    "//div[contains(text(),'" + title + "')]/" + cond,
-    "//td[label[contains(text(), '" + title + "')]]/" + cond,
-    "//tr[td[contains(text(), '" + title + "')]]/td/" + cond,
-    "//tr[td/p[contains(text(), '" + title + "')]]/td/" + cond
-  ];
-  Click_Element(xpaths, 0);
-};
-function Click_Button(title){
-  var xpaths = [
-    "//td[contains(@class, \"buttonMiddle\")][contains(text(), \"" + title + "\")]",
-    "//input[@type=\"button\"][contains(@title, \"" + title + "\")]",
-    "//input[contains(@class, \"button\") or @type=\"button\" or @buttontype=\"button\" or @type=\"submit\"][contains(@value, \"" + title + "\")]",
-    "//a[text()[normalize-space(.) = \"" + title + "\"]]",
-    "//img[contains(@title, \"" + title + "\") or contains(@alt, \"" + title + "\")]",
-    "//input[@type=\"image\"][contains(@alt, \"" + title + "\")]",
-    "//tr[td[contains(text(), \"" + title + "\")]]"
-  ];
-  Click_Element(xpaths, 0);
-};

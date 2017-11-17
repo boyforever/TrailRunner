@@ -2,9 +2,10 @@
 const t = require('../../scripts/trailCrusher.js');
 
 module.exports.Run = function(){
+  t.Enter_Text('Date:','10/11/2017');
   // t.Enter_Text('$1', '5');
-  t.Click_Button(["Detailed Receipt", "Insert new row"]);
-  t.Add_RowToGrid(GridTypeEnum.CATEGORY, ColumnTypeEnum.DROPDOWNBOX, 1, 'Art');
+  // t.Click_Button(["Detailed Receipt", "Insert new row"]);
+  // t.Add_RowToGrid(t.GridTypeEnum.CATEGORY, t.InputTypeEnum.DROPDOWNBOX, 1, 'Art');
   // t.Add_RowToGrid('category', 'dropdownbox', 1, 'Art');
   // t.Add_RowToGrid('category', 'textbox', 3, '2');
   // t.Add_RowToGrid('category', 'textbox', 4, 'test selenium');

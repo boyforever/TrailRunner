@@ -6,8 +6,15 @@ const t = require('./scripts/trailCrusher.js');
 t.Open('http://qascaweb01.schoolcash.net/_Simcoe');
 //run!
 t.Run('login/login');
-t.Run('login/main', 'Transfer Entries');
-t.Run('transfer/categoryTransfer');
+t.Run('login/main', 'fdasfsaf');
+// t.Run('login/main', 'Journal Entries');
+// t.Run('journalentry/journalEntryFormKO');
+// t.Run('login/main', 'Ledger Inquire');
+// t.Run('ledger/ledgerInquire');
+// t.Run('login/main', 'Transfer Entries');
+// t.Run('login/main', 'Purchase Orders');
+// t.Run('purchaseorder/purchaseOrder');
+// t.Run('transfer/categoryTransfer');
 // t.Run('login/main', 'Reconciliation');
 // t.Run('reconciliation/reconcileInformation');
 
@@ -21,6 +28,9 @@ t.Run('transfer/categoryTransfer');
 // t.Run('deposits/selectCurrency');
 // t.Run('deposits/calculatingDeposit');
 // t.Run('login/main', 'School Cash Catalog');
+// t.Click_Button('Delete');
+// t.Wait();
+// t.Click_Button('OK');
 // t.Run('viewItems');
 // t.Run('scripts/main', 'Deposits/Receipts');
 
