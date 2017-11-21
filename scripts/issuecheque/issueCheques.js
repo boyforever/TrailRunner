@@ -10,8 +10,8 @@ module.exports.Run = function(){
   // t.Wait();
   // t.Click_Alert('OK');
   t.Click_Button('Edit the selected row.  Keyboard Shortcut: enter');
-  t.Add_RowToGrid('category', 'dropdownbox', 1, 'Art');
-  t.Add_RowToGrid('category', 'textbox', 6, '2');
-  t.Add_RowToGrid('category', 'textbox', 10, 'test selenium');
+  t.Add_RowToGrid(t.GridTypeEnum.CATEGORY, t.InputTypeEnum.DROPDOWNBOX, 1, 'Art');
+  t.Add_RowToGrid(t.GridTypeEnum.CATEGORY, t.InputTypeEnum.TEXTBOX, 6, '2');
+  t.Add_RowToGrid(t.GridTypeEnum.CATEGORY, t.InputTypeEnum.TEXTBOX, 10, 'test selenium');
   t.Click_Button('Update Suppliers');
 }

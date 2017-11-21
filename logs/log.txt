@@ -1,0 +1,12 @@
+[2017-11-20T21:38:08.161Z] error.message
+[2017-11-20T21:38:08.164Z] error.message
+[2017-11-20T21:38:11.721Z] http://qascaweb01.schoolcash.net/_Simcoe...loaded
+[2017-11-20T21:40:07.950Z] not found
+[2017-11-20T21:40:07.953Z] not found
+[2017-11-20T21:40:11.129Z] http://qascaweb01.schoolcash.net/_Simcoe...loaded
+[2017-11-20T21:42:28.965Z] http://qascaweb01.schoolcash.net/_Simcoe...loaded
+[2017-11-20T21:42:30.775Z] [ Sign In | undefined ] clicked
+[2017-11-20T21:42:34.475Z] [ continueeee | undefined ] not found
+[2017-11-20T21:45:58.762Z] http://qascaweb01.schoolcash.net/_Simcoe...loaded
+[2017-11-20T21:45:59.646Z] [ Sign In | undefined ] clicked
+[2017-11-20T21:46:04.007Z] [ continueeee | undefined ] not found
