@@ -34,14 +34,30 @@ const InputTypeEnum = {
   TEXTBOX: 1,
   DROPDOWNBOX: 2,
   CHECKBOX: 3,
+  BUTTON: 4,
+  LIST: 5,
+  OPTION: 6,
 };
 module.exports = {
   GridTypeEnum,
   InputTypeEnum,
+  ChangeBankAccount : function(bankAccountName){ this.Select_List('', bankAccountName);  driver.sleep(1000);},
+  Click_Alert : function(value){ if(value.toLowerCase() == 'ok'){ driver.switchTo().alert().accept().then(function(){Log(logFileName, "Alert...ok")}).catch(error=>Log(logFileName, error.message));} else {driver.switchTo().alert().dismiss().then(function(){Log(logFileName, "Alert...cancel")}).catch(error=>Log(logFileName, error.message));}},
+  Click_Button : function (title1, title2){ if(typeof title1 === 'string'){ Click(InputTypeEnum.BUTTON, title1, title2, 0); } else { for (var i = 0; i < title1.length; i++){ Click(InputTypeEnum.BUTTON, title1, "", 0); driver.sleep(1000); }}},
+  Click_FileButton : function(value){ driver.findElement(By.xpath("//input[@type='file']")).sendKeys(value); Log(logFileName, "[" + value + "]...selected")},
+  Click_ToUncheck : function(title, value){ Click(xpathsCheckBoxes(InputTypeEnum.CHECKBOX, title, value, false), 0);},
+  // Click_ToUncheck : function(title){ Click(xpathsCheckBoxes(InputTypeEnum.CHECKBOX, title, "", false), 0);},
+  Click_ToCheck : function(title, value){ Click(xpathsCheckBoxes(InputTypeEnum.CHECKBOX, title, value, true), 0);},
+  // Click_ToCheck : function(title){ Click(xpathsCheckBoxes(InputTypeEnum.CHECKBOX, title, "", true), 0);},
   Close : function(){ driver.quit();},
   Goto_Page : function(pageUrl){ driver.get(pageUrl);},
   Run : function(title, action){ require('./' + title + '.js').Run(action);},
-  TakeScreenshot : function(fn){ driver.takeScreenshot().then(function(image, err) { fs.writeFile('./screenshots/' + fn + '.png', image, 'base64', function(err) { }); } );},
+  Select_ItemInRgTable : function(title, value){ driver.findElement(By.xpath("//table[@class='rgMasterTable']/tbody/tr/td[contains(text(), '"+ value + "')]")).then(function(elem){ driver.actions().click(elem).perform(); Log(logFileName, "[" + value + "]...selected");}, function(){ Log(logFileName, "[" + value + "]...not found");})},
+  Select_List : function(title, value){ if(title){ Select_RdDropDown(title, 0, value); } else { driver.findElement(By.xpath("//select/option[contains(text(), '" + value + "')]")).then(function(elem){elem.click(); Log(logFileName, "[" + value + "]...selected");}, function(){ Log(logFileName, "[" + value + "]...not found");})}},
+  Select_Option : function(title, value){ Click(InputTypeEnum.OPTION, title, value, 0);},
+  SwitchTo_MainScreen : function(){ driver.switchTo().defaultContent();},
+  SwitchTo_Popup : function(title){ driver.switchTo().frame(iframe(title));},
+  TakeScreenshot : function(fn){ driver.takeScreenshot().then(function(image, err) { fs.writeFile('./screenshots/' + fn + '.png', image, 'base64', function(err) { }); });},
   Wait : function(interval){ if(!interval || interval <= 0) interval = 2000;  driver.sleep(interval);},
 };
 module.exports.Open = function(pageUrl, expectedTitle){
@@ -122,20 +138,6 @@ module.exports.Add_RowToGrid = function (gridType, columnType, columnIndex, valu
     }
   }
 };
-module.exports.ChangeBankAccount = function(bankAccountName){
-  this.Select_List('', bankAccountName);
-  driver.sleep(1000);
-};
-module.exports.Click_Alert = function(value){
-  switch (value) {
-    case 'OK': driver.switchTo().alert().accept().then(function(){Log(logFileName, "Alert...ok")}).catch(error=>Log(logFileName, error.message)); break;
-    default: driver.switchTo().alert().dismiss().then(function(){Log(logFileName, "Alert...cancel")}).catch(error=>Log(logFileName, error.message));
-  }
-};
-module.exports.Click_Button = function (title1, title2){
-    if(typeof title1 === 'string'){ Click("button", title1, title2, 0); } else { for (var i = 0; i < title1.length; i++){ Click("button", title1, "", 0); driver.sleep(1000); } }
-};
-module.exports.Click_FileButton = function(value){ driver.findElement(By.xpath("//input[@type='file']")).sendKeys(value);};
 module.exports.Click_ButtonInRgTable = function(title, value){
   var grid = driver.findElement(By.xpath("//table[@class='rgMasterTable']"));
   switch (title) {
@@ -149,105 +151,26 @@ module.exports.Click_ButtonInRgTable = function(title, value){
       grid.findElement(By.xpath("//tr[td[contains(text(), '" + value + "')]]/td[7]/a")).click();
   }
 };
-module.exports.Click_ToUncheck = function(title, value){
-  Click(xpathsCheckBoxes("checkbox", title, value, false), 0);
-};
-module.exports.Click_ToUncheck = function(title){
-  Click(xpathsCheckBoxes("checkbox", title, "", false), 0);
-};
-module.exports.Click_ToCheck = function(title, value){
-  Click(xpathsCheckBoxes("checkbox", title, value, true), 0);
-};
-module.exports.Click_ToCheck = function(title){
-  Click(xpathsCheckBoxes("checkbox", title, "", true), 0);
-};
-module.exports.Enter_Date = function(title1, title2, value ){
-  // var xpaths = [
-  //   "//div[div[contains(text(),'" + title1 + "')]][//div[contains(text(), '" + title2 + "')]]//td[@class='rcInputCell']//input[@type='text' and contains(@id, '" + title2.replace(/\s|:/g, '') + "')]",
-  //   "//div[div/span[contains(text(),'" + title1 + "')]]//td[@class='rcInputCell']//input[@type='text' and contains(@id, '" + title2.replace(/\s|:/g, '') + "')]",
-  // ];
-  Input(title1, title2, 0, value);
-};
-module.exports.Enter_Date_Reminder = function(title1, title2, value ){
-  driver.findElement(By.xpath("//div[@class='formRow'][div[@class='formItemLabel'][contains(text(),'" + title1 + "')]][//div[contains(text(), '" + title2 + "')]]//td[@class='rcInputCell']//input[@type='text']")).then(function(elem){ elem.clear(); elem.sendKeys(value);});
-};
-module.exports.Enter_Text = function (title1, title2, value){
-  Input(title1, title2, 0, value);
-};
-module.exports.Enter_Text = function (title, value){
+module.exports.Enter_Text = function (title1, value, title2){
   if(typeof value === 'string'){
-    Input(title, '', 0, value);
+    Input(title1, title2, 0, value);
   } else {
-    var xpath = "(//table/thead[tr/td/p[contains(text(), '" + title + "')]]//td/input[@type='text'])[";
+    var xpath = "(//table/thead[tr/td/p[contains(text(), '" + title1 + "')]]//td/input[@type='text'])[";
     for (var i = 1; i <= value.length; i++){
       driver.findElement(By.xpath(xpath + i + ']')).sendKeys(value[i-1]);
       driver.sleep(1000);
+      Log(logFileName, "[" + title1 + "]=[" + value[i-1] + "]...done");
     }
     driver.findElement(By.xpath(xpath + value.length + ']')).sendKeys(Key.ENTER);
   }
 };
-function Log(fn, msg){ fs.appendFileSync('./logs/' + fn + '.txt', '[' + new Date().toJSON() + '] ' + msg + '\r\n', 'utf8');};
 module.exports.Move_Slider = function(title, minValue, maxValue){
   driver.findElement(By.id("RadSliderEndDrag_RdSliderMinMax")).then(function(elem){ driver.actions().dragAndDrop(elem,{x: (maxValue - 1) * 5, y: 0}).perform(); })
   driver.findElement(By.id("RadSliderDrag_RdSliderMinMax")).then(function(elem){ driver.actions().dragAndDrop(elem, {x: (minValue - 1) * 5, y: 0}).perform();  });
 };
-module.exports.Select_ItemInRgTable = function(title, value){
-  driver.findElement(By.xpath("//table[@class='rgMasterTable']/tbody/tr/td[contains(text(), '"+ value + "')]")).then(function(elem){ driver.actions().click(elem).perform(); });
-};
-module.exports.Select_List = function(title, value){
-  if(title){ Select_RdDropDown(title, 0, value); } else { driver.findElement(By.xpath("//select/option[contains(text(), '" + value + "')]")).then(function(elem){elem.click();})}
-};
-module.exports.Select_Option = function(title, value){
-  Click("option", title, value, 0);
-};
-module.exports.SwitchTo_MainScreen = function(){ driver.switchTo().defaultContent();};
-module.exports.SwitchTo_Popup = function(title){
-  switch (title) {
-    case 'Add an Item Category':
-      driver.switchTo().frame('RdWindowAddModifyCategory');
-      break;
-    case 'Add an Option':
-      driver.switchTo().frame('RdWindowAddModifyOption');
-      break;
-    case 'Add an Option Choice':
-      driver.switchTo().frame('RdWindowAddModifyOptionChoice');
-      break;
-    case 'Add a permission form':
-      driver.switchTo().frame('RdWindowPermissionForm');
-      break;
-    case 'Add a Picture':
-      driver.switchTo().frame('RdWindowPicture');
-      break;
-    case 'Delete Item':
-      driver.switchTo().frame('RdWindowDeleteItem');
-      break;
-    case 'Expire Item':
-      driver.switchTo().frame('RdWindowEditItem');
-      break;
-    case 'Modify an Option':
-      driver.switchTo().frame('RdWindowAddModifyOption');
-      break;
-    case 'Public Confirmation':
-      driver.switchTo().frame('RdWindowPublicConfirmation');
-      break;
-    default:
-  }
-};
-//private functions
 
-
-// function perform(xpath, value){
-//   var xpaths = [];
-//   xpaths.push(xpath);
-//   if(value){
-//     //Input
-//     Input (xpaths, 0, value);
-//   } else {
-//     //click
-//     Click(xpaths, 0);
-//   }
-// };
-
+//========================================private functions==============================================//
+function Log(fn, msg){ fs.appendFileSync('./logs/' + fn + '.txt', '[' + new Date().toJSON() + '] ' + msg + '\r\n', 'utf8');};
 function Click (type, title1, title2, index){
   var xps = Xpaths(type, title1, title2);
   driver.findElement(By.xpath(xps[index])).then(
@@ -255,11 +178,11 @@ function Click (type, title1, title2, index){
     function(){ if(index + 1 >= xps.length){ Log(logFileName, "[ " + title1 + " | " + title2 + " ]...not found"); } else { Click(type, title1, title2, index + 1); } });
 };
 function Input (title1, title2, index, value){
-  var xps = Xpaths("textbox", title1, title2);
-  driver.findElement(By.xpath(xps[index])).then(function(elem){ elem.clear(); elem.sendKeys(value); Log(logFileName, "[" + title + "][" + value + "]...done") },function(){ if(index + 1 == xps.length){Log(logFileName, "[" + title1 + " | " + title2 + "]...not found."); } else {  Input(title1, title2, index + 1, value);  }  });
+  var xps = Xpaths(InputTypeEnum.TEXTBOX, title1, title2);
+  driver.findElement(By.xpath(xps[index])).then(function(elem){ elem.clear(); elem.sendKeys(value); Log(logFileName, "[" + title1 + " | " + title2 + "]=[" + value + "]...done") },function(){ if(index + 1 == xps.length){Log(logFileName, "[" + title1 + " | " + title2 + "]...not found."); } else {  Input(title1, title2, index + 1, value);  }  });
 };
 function Select_RdDropDown (title, index, value){
-  var xps = Xpaths("list", title, "");
+  var xps = Xpaths(InputTypeEnum.LIST, title, "");
   driver.findElement(By.xpath(xps[index])).then(function(elem){
     driver.actions().click(elem).perform();
     Log(logFileName, "[" + title + "]...clicked");
@@ -276,14 +199,26 @@ function Select_RdDropDown (title, index, value){
     Select_RdDropDown(title, index + 1, value);}}
   );
 };
-
+function iframe(title){
+  switch (title) {
+    case 'Add an Item Category': return 'RdWindowAddModifyCategory';
+    case 'Add an Option': return 'RdWindowAddModifyOption';
+    case 'Add an Option Choice': return 'RdWindowAddModifyOptionChoice';
+    case 'Add a permission form': return 'RdWindowPermissionForm';
+    case 'Add a Picture': return 'RdWindowPicture';
+    case 'Delete Item': return 'RdWindowDeleteItem';
+    case 'Expire Item': return 'RdWindowEditItem';
+    case 'Modify an Option': return 'RdWindowAddModifyOption';
+    case 'Public Confirmation': return 'RdWindowPublicConfirmation';
+  }
+};
 function Xpaths(type, title1, title2){
-  switch (type.toLowerCase()) {
-    case "button":  return xpathsButtons(title1, title2);
-    case "checkbox":  return xpathsCheckBoxes(title1, title2);
-    case "option":  return xpathsOptions(title1, title2);
-    case "textbox": return xpathsTextBoxes(title1, title2);
-    case "list":  return xpathsLists(title1);
+  switch (type) {
+    case InputTypeEnum.BUTTON:  return xpathsButtons(title1, title2);
+    case InputTypeEnum.CHECKBOX:  return xpathsCheckBoxes(title1, title2);
+    case InputTypeEnum.OPTION:  return xpathsOptions(title1, title2);
+    case InputTypeEnum.TEXTBOX: return xpathsTextBoxes(title1, title2);
+    case InputTypeEnum.LIST:  return xpathsLists(title1);
   }
 }
 function xpathsButtons(title1, title2){
@@ -298,7 +233,7 @@ function xpathsButtons(title1, title2){
       "//input[contains(@class, \"button\") or @type=\"button\" or @buttontype=\"button\" or @type=\"submit\"][contains(@value, \"" + title1 + "\")]",
       "//a[text()[normalize-space(.) = \"" + title1 + "\"]]",
       "//img[contains(@title, \"" + title1 + "\") or contains(@alt, \"" + title1 + "\")]",
-      "//input[@type=\"image\"][contains(@alt, \"" + title1 + "\")]",
+      "//input[@type=\"image\" and @alt = \"" + title1 + "\"]",
       "//input[@type=\"image\"][contains(@src, \"" + title1.toLowerCase() + "\")]",
       "//tr[td[contains(text(), \"" + title1 + "\")]]",
       "//img[contains(@src, '" + title1.toLowerCase() + "')]",
@@ -325,7 +260,8 @@ function xpathsOptions(title, value) {
   return [
     "//*[div[contains(text(),'" + title + "')]]//td[label[contains(text(),'" + value + "')]]/input",
     "//*[td[contains(text(), '" + title + "')]]//td[label[contains(text(), '" + value + "')]]/input",
-    "//table[//a[contains(text(), '" + title + "')]]//td[contains(text(), '" + value + "')]"
+    "//table[//a[contains(text(), '" + title + "')]]//td[contains(text(), '" + value + "')]",
+    "//div[contains(text(),'" + title + "')][p[contains(text(), 'Attach Item As:')]]//label[text()[normalize-space(.) = '" + value + "']]/input[@type='radio']"
   ];
 }
 function xpathsLists(title){
@@ -342,7 +278,8 @@ function xpathsTextBoxes(title1, title2){
     return [
       "//table[thead//td/p[contains(text(), '" + title1 + "')]]/tbody//td[p[contains(text(), '" + title2 + "')]]/following-sibling::td[1]//input[@type='text']",
       "//div[div[contains(text(),'" + title1 + "')]][//div[contains(text(), '" + title2 + "')]]//td[@class='rcInputCell']//input[@type='text' and contains(@id, '" + title2.replace(/\s|:/g, '') + "')]",
-      "//div[div/span[contains(text(),'" + title1 + "')]]//td[@class='rcInputCell']//input[@type='text' and contains(@id, '" + title2.replace(/\s|:/g, '') + "')]"
+      "//div[div/span[contains(text(),'" + title1 + "')]]//td[@class='rcInputCell']//input[@type='text' and contains(@id, '" + title2.replace(/\s|:/g, '') + "')]",
+      "//div[@class='formRow'][div[@class='formItemLabel'][contains(text(),'" + title1 + "')]][//div[contains(text(), '" + title2 + "')]]//td[@class='rcInputCell']//input[@type='text']"
     ];
   } else {
     return [
@@ -352,7 +289,8 @@ function xpathsTextBoxes(title1, title2){
       "//td[contains(text(),'" + title1 + "')]/following-sibling::td[1]//input[@type='text']",
       "//td[p[contains(text(),'" + title1 + "')]]/following-sibling::td[1]//input[@type='text']",
       "//input[contains(@placeholder, '" + title1 + "')]",
-      "//label[contains(text(), '" + title1 + "')]/following-sibling::input[1]"
+      "//label[contains(text(), '" + title1 + "')]/following-sibling::input[1]",
+      "//label[contains(text(), '" + title1 + "')]/input[@type='text']"
     ];
   }
 };
