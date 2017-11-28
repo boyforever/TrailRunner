@@ -1,8 +1,8 @@
 const t = require('../../../scripts/trailCrusher.js');
 
 module.exports.Run = function(){
-  // select delete item first
-  // then Click_Button('Delete');
+  // select Edit item first
+  // then Click_Button('Edit');
 
 t.Select_List('', 'Cookstown Central Public');
 t.Wait();
@@ -14,7 +14,7 @@ t.Wait();
   t.Click_Button('Edit');
   t.Wait();
 
-  t.Enter_Text('Effective From:', '10/20/2018', 'End Date');
+  t.Enter_Text('Effective From:', '11/20/2018', 'End Date');
   t.Wait();
   t.Click_Button('Save');
 

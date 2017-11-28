@@ -1,8 +1,0 @@
-[1511193095472] starting...
-[1511193095505] loading... main page
-[1511193095509] loading... SCC
-[1511193095513] finished
-[1511193283193] starting...
-[1511193283229] loading... main page
-[1511193283232] loading... SCC
-[1511193283236] finished
