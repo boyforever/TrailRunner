@@ -1,14 +1,14 @@
 
-//put on trail run shoes
-const t = require('./scripts/trailCrusher.js');
-t.LogFileName("run");
+// put on trail run shoes
+const t = require('./scripts/trailCrusher.js')
+t.LogFileName('run')
 
 // t.Log("starting...");
-//ready...set...
+// ready...set...
 // t.Open('http://qascaweb01.schoolcash.net/_Simcoe');
-t.Open('http://qascaweb01.schoolcash.net/_Simcoe', 'Login');
-//run!
-t.Run('login/login');
+t.Open('http://qascaweb01.schoolcash.net/_Simcoe', 'Login')
+
+t.Run('login/login')
 // t.Log('log', 'test');
 // t.Log(logFileName, "loading... main page");
 // t.Run('login/main', 'fdasfsaf');
@@ -28,9 +28,15 @@ t.Run('login/login');
 // t.Run('login/main', 'Reconciliation');
 // t.Run('reconciliation/reconcileInformation');
 
-t.Run('login/main', 'School Cash Register');
-t.Run('scr/search')
-
+// t.Run('login/main', 'School Cash Register')
+// t.Run('scr/search')
+t.Run('reports/categoryReport8')
+t.Wait()
+// t.Run('scr/groupCollection')
+// t.Run('scr/modification')
+// t.Run('scr/printReceipts')
+// t.Run('scr/itemHistory')
+// t.Run('scr/checkOut')
 // t.ChangeBankAccount('Barrie Learning Centre - SGF');
 // t.Wait();
 // t.Run('login/main', 'Issue Checks - Disbursements');
@@ -75,5 +81,4 @@ t.Run('scr/search')
 // t.Run('itemOrderReport');
 // t.Run('adoptionReport');
 
-//good job!
 // t.Close();
