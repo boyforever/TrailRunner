@@ -1,16 +1,14 @@
 
-const t = require('../../scripts/trailCrusher.js');
+const t = require('../../scripts/trailCrusher.js')
 
-module.exports.Run = function(){
-  t.Enter_Text('Date:','10/11/2017');
+module.exports.Run = function() {
+  // t.Enter_Text('Date:', '10/11/2017')
   // t.Enter_Text('$1', '5');
   // t.Click_Button(["Detailed Receipt", "Insert new row"]);
-  // t.Add_RowToGrid(t.GridTypeEnum.CATEGORY, t.InputTypeEnum.DROPDOWNBOX, 1, 'Art');
-  // t.Add_RowToGrid('category', 'dropdownbox', 1, 'Art');
-  // t.Add_RowToGrid('category', 'textbox', 3, '2');
-  // t.Add_RowToGrid('category', 'textbox', 4, 'test selenium');
-  // t.Add_Category("Art", 1, "2", 3, "test selenium", 4);
-  // t.Enter_Text("Checks", ['1', '15']);
+  // t.Click_Button(['Detailed Receipt', 'Save changes to the selected row'])
+  // t.Add_RowToGrid(t.GridTypeEnum.CATEGORY, t.InputTypeEnum.DROPDOWNBOX, 1, 'Art')
+
+  // t.Enter_Text('Cheques', ['1', '15'])
   // t.Select_List("Art");
   // t.Click_Button();
   // t.Click_Button("Forms");

@@ -37,7 +37,10 @@ module.exports = {
   CategoryTransfer_From: (categroy, amount, memo, dept, code) => { categoryTransfer(1, categroy, amount, memo, dept, code) },
   CategoryTransfer_To: (categroy, amount, memo, dept, code) => { categoryTransfer(2, categroy, amount, memo, dept, code) },
   ChangeBankAccount: (bankAccountName) => { this.Select_List('', bankAccountName); driver.sleep(1000) },
-  Click_Alert: (value) => { if (value.toLowerCase() === 'ok') { driver.switchTo().alert().accept().then(Log('Alert...ok')) } else { driver.switchTo().alert().dismiss().then(Log('Alert...cancel')) } },
+  Check_Item: (id, value) => {
+    driver.findElement(By.xpath('//md-checkbox[contains(@id, "' + id + '")]/div/span[contains(text(), "' + value + '")]')).click()
+  },
+  Click_Alert: (value) => { if (value === 'OK') { driver.switchTo().alert().accept().then(Log('Alert...ok')) } else { driver.switchTo().alert().dismiss().then(Log('Alert...cancel')) } },
   Click_Button: (title1, title2) => { if (typeof title1 === 'string') { click(InputTypeEnum.BUTTON, title1, title2, 0) } else { for (let i = 0; i < title1.length; i++) { click(InputTypeEnum.BUTTON, title1, '', 0); driver.sleep(1000) } } },
   Click_ButtonInRgTable: (title, value) => {
     const grid = driver.findElement(By.xpath('//table[@class="rgMasterTable"]'))
@@ -51,17 +54,26 @@ module.exports = {
   Click_FileButton: (value) => { driver.findElement(By.xpath('//input[@type="file"]')).sendKeys(value); Log('[' + value + ']...selected') },
   Click_InTable: (title, subtitle, column) => { driver.findElement(By.xpath('//div[*[contains(text(), "' + title + '")]]//table/tbody/tr[td/*[contains(text(),"' + subtitle + '")]]/td[' + column + ']')).then((elem) => { elem.click().then(Log('[' + title + ' (' + subtitle + ', ' + column + ')]...clicked')) }, () => { Log('[' + title + ' (' + subtitle + ', ' + column + ')]...not found') }) },
   Click_Select: (title, value) => { clickSelect(xpathsSelects(title, value), 0, title + ' | ' + value) },
-  Click_ToUncheck: (title, value) => { click(InputTypeEnum.CHECKBOX, title, value, 0, false) },
   Click_ToCheck: (title, value) => { click(InputTypeEnum.CHECKBOX, title, value, 0, true) },
   Click_ToCheck_InTable: (table, row, column, value) => { actionInTable(table, row, column, value, InputTypeEnum.CHECKBOX) },
-  clickCheckBoxAgGridHeader: clickCheckBoxAgGridHeader,
-  clickCheckBoxAgGridRow: clickCheckBoxAgGridRow,
+  clickCheckBoxAgGridHeader: () => clickCheckBoxAgGridHeader,
+  clickCheckBoxAgGridRow: () => clickCheckBoxAgGridRow,
   Close: () => { driver.quit() },
   Enter_Text_InTable: (title, subtitle, column, value) => { driver.findElement(By.xpath('//div[*[contains(text(), "' + title + '")]]//table/tbody/tr[td/*[contains(text(),"' + subtitle + '")]]/td[' + column + ']/input[@type="text"]')).then((elem) => { elem.sendKeys(Key.ENTER + Key.chord(Key.CONTROL, 'a') + Key.DELETE + value + Key.ENTER).then(Log('[' + title + ' (' + subtitle + ', ' + column + ') | ' + value + ']...entered')) }, () => { Log('[' + title + ' (' + subtitle + ', ' + column + ') | ' + value + ']...not found') }) },
+  Click_ToUncheck: (title, value) => { click(InputTypeEnum.CHECKBOX, title, value, 0, false) },
+  Click_ToUpload: (id, filename) => {
+    driver.findElement(By.xpath('//div[@id="' + id + '"]')).then((elem) => {
+
+    })
+  },
   Enter_Text: (title1, value, title2) => {
     if (typeof value === 'string') { input(title1, title2, 0, value) } else {
-      const xpath = '(//table/thead[tr/td/p[contains(text(), ' + title1 + ')]]//td/input[@type=text])['
-      for (let i = 1; i <= value.length; i++) { driver.findElement(By.xpath(xpath + i + ']')).sendKeys(value[i - 1]); driver.sleep(1000); Log('[' + title1 + ']=[' + value[i - 1] + ']...done') }
+      const xpath = '(//table/thead[tr/td/p[contains(text(), "' + title1 + '")]]//td/input[@type="text"])['
+      for (let i = 1; i <= value.length; i++) {
+        driver.findElement(By.xpath(xpath + i + ']')).sendKeys(value[i - 1])
+        driver.sleep(1000)
+        Log('[' + title1 + ']=[' + value[i - 1] + ']...done')
+      }
       driver.findElement(By.xpath(xpath + value.length + ']')).sendKeys(Key.ENTER)
     }
   },
@@ -72,8 +84,9 @@ module.exports = {
   LogFileName: (title) => { logFileName = title },
   Move_Slider: (title, minValue, maxValue) => { driver.findElement(By.id('RadSliderEndDrag_RdSliderMinMax')).then((elem) => { driver.actions().dragAndDrop(elem, { x: (maxValue - 1) * 5, y: 0 }).perform() }); driver.findElement(By.id('RadSliderDrag_RdSliderMinMax')).then((elem) => { driver.actions().dragAndDrop(elem, { x: (minValue - 1) * 5, y: 0 }).perform() }) },
   Open: (pageUrl, expectedTitle) => { driver = new webdriver.Builder().withCapabilities(webdriver.Capabilities.chrome()).build(); if (pageUrl) { if (expectedTitle) { driver.get(pageUrl).then(driver.getTitle().then((title) => { if (title.toLowerCase() === expectedTitle.toLowerCase()) { Log(pageUrl + '...loaded') } else { Log(pageUrl + '...failed: ' + title) } })).catch(console.log.bind(console)) } else { driver.get(pageUrl) } } },
-  Run: (title, action) => { require('./' + title + '.js').Run(action) },
+  Run: (title, action, input) => { require('./' + title + '.js').Run(action, input) },
   Select_ItemInRgTable: (title, value) => { driver.findElement(By.xpath('//table[@class=rgMasterTable]/tbody/tr/td[contains(text(), ' + value + ')]')).then((elem) => { driver.actions().click(elem).perform(); Log('[' + value + ']...selected') }, () => { Log('[' + value + ']...not found') }) },
+  Select_Item: (id, value) => { driver.findElement(By.xpath('//md-select[@id="' + id + '"]')).then((elem) => { elem.click(); Log('[' + id + ']...selected'); driver.findElement(By.xpath('//md-option[contains(@id, "' + id + '")]/div[contains(text(), "' + value + '")]')).then((elem) => { elem.click(); Log('[' + value + ']...selected') }, () => { Log('[' + value + ']...not found') }) }, () => { Log('[' + id + ']...not found') }) },
   Select_List: (title, value) => { if (title) { selectRddropdown(title, 0, value) } else { driver.findElement(By.xpath('//select/option[contains(text(), "' + value + '")]')).then((elem) => { elem.click(); Log('[' + value + ']...selected') }, () => { Log('[' + value + ']...not found') }) } },
   Select_List_InTable: (title, subtitle, column, value) => { driver.findElement(By.xpath('//div[*[contains(text(), "' + title + '")]]//table/tbody/tr[td/*[contains(text(),"' + subtitle + '")]]/td[' + column + ']/select/option[contains(text(), "' + value + '")]')).then((elem) => { elem.click().then(Log('[' + title + ' (' + subtitle + ', ' + column + ') | ' + value + ']...selected')) }, () => { Log('[' + title + ' (' + subtitle + ', ' + column + ') | ' + value + ']...not found') }) },
   Select_Option: (title, value) => { click(InputTypeEnum.OPTION, title, value, 0) },
@@ -88,17 +101,17 @@ module.exports = {
 module.exports.Add_RowToGrid = (gridType, columnType, columnIndex, value) => {
   let xpath = ''
   if (gridType === GridTypeEnum.PURCHASEORDER) {
-    xpath = '//table[@id=' + GridTypeEnum.properties[gridType].grid + ']/tbody/tr[last()]'
+    xpath = '//table[@id="' + GridTypeEnum.properties[gridType].grid + '"]/tbody/tr[last()]'
     driver.findElement(By.xpath(xpath)).then((elem) => { elem.click() })
     driver.sleep(1000)
     let action = 'click'
     switch (columnIndex) {
-      case 1: xpath = xpath + '/td[2]/select[1]/option[text()= ' + value + ']'; break
-      case 2: xpath = xpath + '/td[2]/select[2]/option[text()= ' + value + ']'; break
-      case 3: xpath = xpath + '/td[2]/select[3]/option[text()= ' + value + ']'; break
-      case 5: xpath = xpath + '/td[3]/select/option[text()= ' + value + ']'; break
-      case 6: xpath = xpath + '/td[4]/select[1]/option[text()= ' + value + ']'; break
-      case 7: xpath = xpath + '/td[4]/select[2]/option[text()= ' + value + ']'; break
+      case 1: xpath = xpath + '/td[2]/select[1]/option[text()= "' + value + '"]'; break
+      case 2: xpath = xpath + '/td[2]/select[2]/option[text()= "' + value + '"]'; break
+      case 3: xpath = xpath + '/td[2]/select[3]/option[text()= "' + value + '"]'; break
+      case 5: xpath = xpath + '/td[3]/select/option[text()= "' + value + '"]'; break
+      case 6: xpath = xpath + '/td[4]/select[1]/option[text()= "' + value + '"]'; break
+      case 7: xpath = xpath + '/td[4]/select[2]/option[text()= "' + value + '"]'; break
       case 4:
         xpath = xpath + '/td[3]/input'
         action = 'oneinput'
@@ -117,15 +130,15 @@ module.exports.Add_RowToGrid = (gridType, columnType, columnIndex, value) => {
       case 'oneinput': driver.findElement(By.xpath(xpath)).then((elem) => { elem.clear(); elem.sendKeys(value); elem.sendKeys(Key.ENTER) })
     }
   } else {
-    xpath = '//div[contains(@id, _' + GridTypeEnum.properties[gridType].grid + '_column' + (columnIndex - 1) + '_control)]'
+    xpath = '//div[contains(@id, "_' + GridTypeEnum.properties[gridType].grid + '_column' + (columnIndex - 1) + '_control")]'
     if (columnType === InputTypeEnum.DROPDOWNBOX) {
-      xpath = xpath + '/select/option[text()= ' + value + ']'
-      driver.findElement(By.xpath(xpath)).then((elem) => { elem.click() })
+      xpath = xpath + '//select/option[text()= "' + value + '"]'
+      driver.findElement(By.xpath(xpath)).then((elem) => { elem.click(); Log(xpath + '...clicked') })
     } else if (columnType === InputTypeEnum.TEXTBOX) {
-      xpath = xpath + '/input[@type=text]'
+      xpath = xpath + '//input[@type="text"]'
       driver.findElement(By.xpath(xpath)).then((elem) => { elem.clear(); elem.sendKeys(value) })
     } else if (columnType === InputTypeEnum.CHECKBOX) {
-      xpath = xpath + '/input[@type=checkbox]'
+      xpath = xpath + '//input[@type="checkbox"]'
       driver.findElement(By.xpath(xpath)).then((elem) => { elem.click() })
     }
   }
@@ -220,8 +233,15 @@ function Xpaths(type, title1, title2, isToCheck) {
   }
 }
 function xpathsButtons(title1, title2) {
-  if (title2) { return ['//div[span[contains(text(), "' + title1 + '")]]//td[contains(text(), "' + title2 + '")]'] } else {
+  if (title2) {
     return [
+      '//div[span[contains(text(), "' + title1 + '")]]//td[contains(text(), "' + title2 + '")]',
+      '//td[@class="' + title1 + '"]/a[contains(normalize-space(.), "' + title2 + '")]',
+      '//div[div/table//td[contains(text(), "' + title1 + '")]]//p/a[contains(text(), "' + title2 + '")]']
+  } else {
+    return [
+      '//button/span[contains(text(), "' + title1 + '")]',
+      '//md-switch[@id="' + title1 + '"]',
       '//input[@type="button" and @id="' + title1 + '"]',
       '//td[contains(@class, "buttonMiddle")][contains(text(), "' + title1 + '")]',
       '//input[@type="button"][contains(@title, "' + title1 + '")]',
@@ -229,16 +249,17 @@ function xpathsButtons(title1, title2) {
       '//a[text()[normalize-space(.) = "' + title1 + '"]]',
       '//img[contains(@title, "' + title1 + '") or contains(@alt, "' + title1 + '")]',
       '//input[@type="image" and @alt = "' + title1 + '"]',
-      '//input[@type="image"][contains(@src, "' + title1.toLowerCase() + '")]',
+      '//input[@type="image"][contains(@src, "' + title1 + '")]',
       '//tr[td[contains(text(), "' + title1 + '")]]',
-      '//img[contains(@src, "' + title1.toLowerCase() + '")]',
+      '//img[contains(@src, "' + title1 + '")]',
       '//button/span[contains(text(), "' + title1 + '")]',
-      '//a/span/span[contains(text(), "' + title1 + '")]'
+      '//a/span/span[contains(text(), "' + title1 + '")]',
+      '//a[contains(normalize-space(), "' + title1 + '")]'
     ]
   }
 }
 function xpathsCheckBoxes(title, value, isToCheck) {
-  let cond = 'input[@type="checkbox" and @checked="checked"]'
+  let cond = 'input[@type="checkbox"]'
   if (isToCheck) { cond = 'input[@type="checkbox" and not (@checked)]' }
   return [
     '//*[div[contains(text(), "' + title + '")]][//label[contains(text(), "' + value + '")]]//' + cond,
@@ -249,7 +270,8 @@ function xpathsCheckBoxes(title, value, isToCheck) {
     '//tr[td[contains(text(), "' + title + '")]]/td/' + cond,
     '//tr[td/p[contains(text(), "' + title + '")]]/td/' + cond,
     '//tr[td/a[contains(text(), "' + title + '")]]/td/' + cond,
-    '//*[label[contains(text(), "' + title + '")]]/' + cond
+    '//*[label[contains(text(), "' + title + '")]]/' + cond,
+    '//td[*[contains(text(), "' + title + '")]]/' + cond
   ]
 }
 function xpathsOptions(title, value) {
@@ -259,7 +281,8 @@ function xpathsOptions(title, value) {
     '//table[//a[contains(text(), "' + title + '")]]//td[contains(text(), "' + value + '")]',
     '//div[p[contains(text(), "' + title + '")]]//label[text()[normalize-space(.) = "' + value + '"]]/input[@type=radio]',
     '//table/tbody[tr/td[contains(text(), "' + title + '")]]//tr/td//li[span[contains(text(), "' + value + '")]]',
-    '//*[label[contains(text(), "' + value + '")]]/input[@type="radio"]'
+    '//*[label[contains(text(), "' + value + '")]]/input[@type="radio"]',
+    '//td[*[contains(text(), "' + value + '")]]/input[@type="radio"]'
   ]
 }
 
@@ -310,6 +333,8 @@ function xpathsTextBoxes(title1, title2) {
     ]
   } else {
     return [
+      '//input[@id="' + title1 + '"]',
+      '//textarea[@id="' + title1 + '"]',
       '//input[@name= "' + title1 + '"]',
       '//div[div[contains(text(),"' + title1 + '")]]//input[@type="text"]',
       '//div[div[contains(text(),"' + title1 + '")]]//textarea',

@@ -1,6 +1,6 @@
-const t = require('../../scripts/trailCrusher.js');
+const t = require('../../scripts/trailCrusher.js')
 
-module.exports.Run = function(action){
-  t.Click_Button(action);
-  t.Wait();
+module.exports.Run = function(action) {
+  t.Click_Button(action)
+  t.Wait()
 }
